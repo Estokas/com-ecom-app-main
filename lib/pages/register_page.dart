@@ -15,7 +15,7 @@ class _RegisterState extends State<RegisterPage> {
       _lastName = TextEditingController(),
       _password = TextEditingController(),
       _emailAddress = TextEditingController();
-  bool _isCustomer = false;
+  bool _isProvider = false;
 
   @override
   Widget build(BuildContext context) {
@@ -71,10 +71,10 @@ class _RegisterState extends State<RegisterPage> {
               ),
               CheckboxListTile(
                 title: Text("I'm a service provider"),
-                value: _isCustomer,
+                value: _isProvider,
                 onChanged: (bool? value) {
                   setState(() {
-                    _isCustomer = value ?? false;
+                    _isProvider = value ?? false;
                   });
                 },
               ),
@@ -87,7 +87,7 @@ class _RegisterState extends State<RegisterPage> {
                       "lastName": _lastName.text,
                       "email": _emailAddress.text,
                       "password": _password.text,
-                      "role": _isCustomer == false ? "USER" : "PROVIDER",
+                      "role": _isProvider == false ? "USER" : "PROVIDER",
                     }).then((value) {
                       if (value) {
                         context.router.replaceAll([const LoginRoute()]);

@@ -14,7 +14,7 @@ class LoginPage extends StatefulWidget {
 class _LoginState extends State<LoginPage> {
   final TextEditingController _username = TextEditingController(),
       _password = TextEditingController();
-  bool _isCustomer = false;
+  bool _isProvider = false;
 
   @override
   Widget build(BuildContext context) {
@@ -53,10 +53,10 @@ class _LoginState extends State<LoginPage> {
               ),
               CheckboxListTile(
                 title: Text("I'm a service provider"),
-                value: _isCustomer,
+                value: _isProvider,
                 onChanged: (bool? value) {
                   setState(() {
-                    _isCustomer = value ?? false;
+                    _isProvider = value ?? false;
                   });
                 },
               ),
@@ -66,13 +66,13 @@ class _LoginState extends State<LoginPage> {
                       .login(
                           email: _username.text,
                           password: _password.text,
-                          role: _isCustomer == false ? "USER" : "PROVIDER")
+                          role: _isProvider == false ? "USER" : "PROVIDER")
                       .then((value) {
                     if (value['success']) {
-                      if (_isCustomer == false && value['role'] == 'USER') {
+                      if (_isProvider == true && value['role'] == 'PROVIDER') {
                         context.router.replace(const HomeRoute());
                       }
-                      if (_isCustomer == true && value['role'] == 'PROVIDER') {
+                      if (_isProvider == false && value['role'] == 'USER') {
                         Navigator.push(
                             context,
                             MaterialPageRoute(

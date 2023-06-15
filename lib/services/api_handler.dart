@@ -39,16 +39,14 @@ class ApiHandler {
 
       if (response.statusCode == 200) {
         final jwt = response.data['token'];
-        final role = response.data['token'];
         dio.options.headers['authorization'] = "Bearer $jwt";
 
-        return {"success": true, "role": role};
+        return {"success": true, "role": response.data['role']};
       }
     } catch (e) {
-      print(e);
-      return {"success": false, "role": role};
+      return {"success": false, "role": ""};
     }
-    return {"success": false, "role": role};
+    return {"success": false, "role": ""};
   }
 
   // Future<String?> refreshToken() async {
