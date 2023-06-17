@@ -1,3 +1,5 @@
+// import 'dart:ffi';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_app/routes/router.gr.dart';
@@ -69,14 +71,14 @@ class _LoginState extends State<LoginPage> {
                           role: _isProvider == false ? "USER" : "PROVIDER")
                       .then((value) {
                     if (value['success']) {
-                      if (_isProvider == true && value['role'] == 'PROVIDER') {
-                        context.router.replace(const HomeRoute());
-                      }
-                      if (_isProvider == false && value['role'] == 'USER') {
+                      if (value['role'] == "USER" && _isProvider == false) {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (context) => HomePageCustomer()));
+                      }
+                      if (value['role'] == "PROVIDER" && _isProvider == true) {
+                        context.router.replace(const HomeRoute());
                       }
                     }
                   });

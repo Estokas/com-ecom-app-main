@@ -1,4 +1,5 @@
 import 'dart:convert';
+// import 'dart:ffi';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -172,6 +173,54 @@ class ApiHandler {
       print(e);
       rethrow;
     }
+  }
+
+  Future<bool> addProduct(product) async {
+    try {
+      print(product);
+      final response = await dio.post("/api/rest/v1/add/product", data: {
+        "shop": product["shop"],
+        "name": product["name"],
+        "description": product["description"],
+        "price": product["price"],
+        "variant": product["variant"],
+        "category": product["category"],
+        "enable": product["enable"],
+        "image": product["image"],
+      });
+
+      if (response.statusCode == 200) {
+        return true;
+      }
+    } catch (e) {
+      print(e);
+      rethrow;
+    }
+    return false;
+  }
+
+  Future<bool> addService(service) async {
+    try {
+      print(service);
+      final response = await dio.post("/api/rest/v1/add/service", data: {
+        "shop": service["shop"],
+        "name": service["name"],
+        "description": service["description"],
+        "fee": service["fee"],
+        // "variant": service["variant"],
+        "category": service["category"],
+        "enable": service["enable"],
+        "image": service["image"],
+      });
+
+      if (response.statusCode == 200) {
+        return true;
+      }
+    } catch (e) {
+      print(e);
+      rethrow;
+    }
+    return false;
   }
 
   Future<Map> productDetailFetch(int productId) async {

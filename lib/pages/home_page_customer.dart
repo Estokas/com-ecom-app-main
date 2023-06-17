@@ -29,7 +29,7 @@ class Shop {
 }
 
 class Item {
-  final int id;
+  final String id;
   final String name;
   final String imageUrl;
   final int price;
@@ -59,16 +59,17 @@ class HomePageCustomer extends StatefulWidget {
 }
 
 class _HomePageCustomerState extends State<HomePageCustomer> {
-  List<Shop> _shops = [
+  List<String> _shops = [
+    "123"
     // Shop(id: 1, name: 'shop1'),
     // Shop(id: 2, name: 'shop2'),
     // Shop(id: 3, name: 'shop3'),
     // Shop(id: 4, name: 'shop4'),
   ];
-  late Shop _selectedShop = _shops[0];
+  late String _selectedShop = _shops[0];
   List<Item> _items = [
     Item(
-        id: 1,
+        id: '1',
         name: "title1",
         imageUrl: "imageUrl1",
         price: 1,
@@ -119,12 +120,15 @@ class _HomePageCustomerState extends State<HomePageCustomer> {
 
   Future<void> _fetchShops() async {
     final response =
-        await http.get('http://localhost:8000/api/rest/v1/shops' as Uri);
-    final data = json.decode(response.body);
-    print(data);
-    final List<Shop> shops = [];
-    for (var jsonShop in data) {
-      shops.add(Shop.fromJson(jsonShop));
+        await ApiHandler.dio.get('http://localhost:8000/api/rest/v1/shops');
+    // final data = jsonDecode(response.data);
+    print(response.data);
+    List<String> shops = [];
+    for (var shop in response.data) {
+      // Check if the item is a String, if so, add to stringList
+      if (shop.runtimeType == String) {
+        shops.add(shop);
+      }
     }
     setState(() {
       _shops = shops;
@@ -134,17 +138,36 @@ class _HomePageCustomerState extends State<HomePageCustomer> {
   }
 
   Future<void> _fetchItems() async {
-    final response = await http.get(
-        "http://localhost:8000/api/rest/v1/shops/${_selectedShop.name}" as Uri);
-    final data = json.decode(response.body);
-    print(data);
-    final List<Item> items = [];
-    for (var jsonItem in data) {
-      items.add(Item.fromJson(jsonItem));
+    final response = await ApiHandler.dio
+        .get("http://localhost:8000/api/rest/v1/shops/${_selectedShop}");
+    print(response.data);
+    List<Item> items = [];
+    for (var i in response.data) {
+      if (!i.containsKey('image')) {
+        i['image'] = {"path": ''};
+      }
+      try {
+        items.add(Item(
+          id: i['_id'],
+          description: i['description'],
+          imageUrl: i['image']['path'],
+          name: i['name'],
+          price: i['price'],
+        ));
+      } catch (e) {
+        items.add(Item(
+          id: i['_id'],
+          description: i['description'],
+          imageUrl: i['image']['path'],
+          name: i['name'],
+          price: i['fee'],
+        ));
+      }
     }
     setState(() {
       _items = items;
     });
+    print(_items[0]);
   }
 
   @override
@@ -152,7 +175,7 @@ class _HomePageCustomerState extends State<HomePageCustomer> {
     final cart = Provider.of<CartProvider>(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Computer Parts and Services'),
+        title: const Text('Service Provider'),
         automaticallyImplyLeading: false,
         leading: IconButton(
           onPressed: () {
@@ -187,81 +210,83 @@ class _HomePageCustomerState extends State<HomePageCustomer> {
           ),
         ],
       ),
-      body: FutureBuilder(
-        future: _fetchShops(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator();
-          }
-          return Column(
-            children: [
-              DropdownButton<Shop>(
-                value: _selectedShop,
-                items: _shops.map((Shop shop) {
-                  return DropdownMenuItem<Shop>(
-                    value: shop,
-                    child: Text(
-                      shop.name,
-                      style: TextStyle(
-                        decoration: TextDecoration.underline,
-                        decorationColor: Colors.red,
-                        decorationStyle: TextDecorationStyle.dashed,
-                      ),
-                    ),
-                  );
-                }).toList(),
-                onChanged: (Shop? shop) {
-                  setState(() {
-                    _selectedShop = shop ?? Shop(id: 1, name: "");
-                    _fetchItems();
-                  });
-                },
-              ),
-              Expanded(
-                child: GridView.builder(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 0.7,
+      body:
+          // FutureBuilder<List<String>>(
+          //   future: _fetchShops(),
+          //   builder: (context, snapshot) {
+          //     if (snapshot.connectionState == ConnectionState.waiting) {
+          //       return CircularProgressIndicator();
+          //     }
+          //     _fetchItems();
+          //     return
+          Column(
+        children: [
+          DropdownButton<String>(
+            value: null,
+            items: _shops.map((String shop) {
+              return DropdownMenuItem<String>(
+                value: shop,
+                child: Text(
+                  shop,
+                  style: const TextStyle(
+                    decoration: TextDecoration.underline,
+                    decorationColor: Colors.red,
+                    decorationStyle: TextDecorationStyle.dashed,
                   ),
-                  itemCount: _items.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    Item item;
-                    try {
-                      item = _items[index];
-                      print(item);
-                    } catch (e) {
-                      return CircularProgressIndicator();
-                    }
-                    return Card(
-                      child: Column(
-                        children: [
-                          Image.network(item.imageUrl),
-                          Text(item.name),
-                          Text('\$${item.price}'),
-                          Text(item.description),
-                          ElevatedButton(
-                            child: Text('Add to cart'),
-                            onPressed: () {
-                              // Add the item to the cart
-                              cart.addItem({
-                                "id": item.id,
-                                "imageUrl": item.imageUrl,
-                                "name": item.name,
-                                "price": item.price,
-                                "description": item.description
-                              }, 'product');
-                            },
-                          ),
-                        ],
-                      ),
-                    );
-                  },
                 ),
+              );
+            }).toList(),
+            onChanged: (String? shop) {
+              setState(() {
+                _selectedShop = shop ?? '';
+                _fetchItems();
+              });
+            },
+          ),
+          Expanded(
+            child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 0.7,
               ),
-            ],
-          );
-        },
+              itemCount: _items.length,
+              itemBuilder: (BuildContext context, int index) {
+                Item item;
+                try {
+                  item = _items[index];
+                  print(item);
+                } catch (e) {
+                  return CircularProgressIndicator();
+                }
+                return Card(
+                  child: Column(
+                    children: [
+                      Image.network('${ApiHandler.baseURl}${item.imageUrl}'),
+                      Text(item.name),
+                      Text('\$${item.price}'),
+                      Text(item.description),
+                      ElevatedButton(
+                        child: Text('Add to cart'),
+                        onPressed: () {
+                          // Add the item to the cart
+                          cart.addItem({
+                            "id": item.id,
+                            "imageUrl": item.imageUrl,
+                            "name": item.name,
+                            "price": item.price,
+                            "description": item.description
+                          }, 'product');
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
+    // },
   }
 }

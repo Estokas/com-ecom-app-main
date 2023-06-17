@@ -15,9 +15,8 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ApiHandler()
-    //     .getSession()
-    //     .onError((error, stackTrace) =>  context.router.navigate(const LoginRoute()));
+    ApiHandler().getSession().onError(
+        (error, stackTrace) => context.router.navigate(const LoginRoute()));
 
     return DefaultTabController(
       length: 2,
