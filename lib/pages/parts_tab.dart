@@ -82,6 +82,8 @@ class _PartsTabState extends State<PartsTab> {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else {
             _categories = snapshot.data ?? [];
+            _categoryController.text = _categories[0];
+            _isEnabled = false;
             print(_categories);
             return SingleChildScrollView(
               child: Padding(
@@ -135,7 +137,7 @@ class _PartsTabState extends State<PartsTab> {
                         //     : _categories
                         //         .where((i) => i == _categoryController.text)
                         //         .first,
-                        value: null,
+                        value: _categoryController.text,
                         isDense: true,
                         items: _categories.map((String category) {
                           return DropdownMenuItem<String>(
@@ -144,9 +146,7 @@ class _PartsTabState extends State<PartsTab> {
                           );
                         }).toList(),
                         onChanged: (value) {
-                          setState(() {
-                            _categoryController.text = value!;
-                          });
+                          _categoryController.text = value!;
                         },
                         validator: (value) {
                           if (value!.isEmpty) {
@@ -190,11 +190,9 @@ class _PartsTabState extends State<PartsTab> {
                         children: [
                           Text('Enabled'),
                           Switch(
-                            value: _isEnabled,
+                            value: _isEnabled ?? false,
                             onChanged: (value) {
-                              setState(() {
-                                _isEnabled = value;
-                              });
+                              _isEnabled = value;
                             },
                           ),
                         ],
